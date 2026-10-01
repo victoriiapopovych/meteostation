@@ -9,14 +9,14 @@ import java.util.Locale;
 import java.util.ArrayList;
 
 /**
- * Лабораторна робота № 1.
+ * Лабораторна робота № 2.
  * Варіант 18 — «Метеостанція».
  */
 public final class Main {
 
     private static final Path DEFAULT_INPUT = Path.of("data", "input.csv");
     private static final Path DEFAULT_OUTPUT = Path.of("out", "report.txt");
-    private static final String VERSION = "1.0.0";
+    private static final String VERSION = "2.0.0";
 
     private Main() {
     }
@@ -219,7 +219,7 @@ public final class Main {
      */
     private static void printHelp() {
         System.out.printf(
-                "Лабораторна робота № 1, варіант 18 — Метеостанція%n"
+                "Лабораторна робота № 2, варіант 18 — Метеостанція%n"
                         + "%n"
                         + "Використання:%n"
                         + "  java ua.lpnu.kzp.Main [параметри]%n"

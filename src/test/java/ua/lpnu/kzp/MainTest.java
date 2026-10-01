@@ -134,7 +134,7 @@ class MainTest {
         }
 
         assertEquals(
-                "1.0.0" + System.lineSeparator(),
+                "2.0.0" + System.lineSeparator(),
                 output.toString(StandardCharsets.UTF_8));
     }
 
