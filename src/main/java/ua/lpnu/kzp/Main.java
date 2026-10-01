@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
+import java.util.ArrayList;
 
 /**
  * Лабораторна робота № 1.
@@ -15,7 +16,6 @@ public final class Main {
 
     private static final Path DEFAULT_INPUT = Path.of("data", "input.csv");
     private static final Path DEFAULT_OUTPUT = Path.of("out", "report.txt");
-    private static final int FIELD_COUNT = 5;
     private static final String VERSION = "1.0.0";
 
     private Main() {
@@ -96,10 +96,7 @@ public final class Main {
             return;
         }
 
-        int validCount = 0;
-        double minTemperature = Double.POSITIVE_INFINITY;
-        double totalHumidity = 0.0;
-        double maxWind = Double.NEGATIVE_INFINITY;
+        List<WeatherReading> readings = new ArrayList<>();
 
         for (int index = 0; index < lines.size(); index++) {
             String line = lines.get(index);
@@ -110,88 +107,17 @@ public final class Main {
                 continue;
             }
 
-            // -1 зберігає порожнє останнє поле після розділення.
-            String[] fields = line.split(";", -1);
-
-            if (fields.length != FIELD_COUNT) {
-                printSkippedLine(
-                        lineNumber,
-                        "очікується 5 полів, отримано %d"
-                                .formatted(fields.length));
-                continue;
-            }
-
-            String date = fields[0].trim();
-
-            if (date.isEmpty()) {
-                printSkippedLine(
-                        lineNumber,
-                        "дата не може бути порожньою");
-                continue;
-            }
-
-            if (!date.matches("\\d{4}-\\d{2}-\\d{2}")) {
-                printSkippedLine(
-                        lineNumber,
-                        "дата повинна мати формат YYYY-MM-DD");
-                continue;
-            }
-
             try {
-                double temperature =
-                        Double.parseDouble(fields[1].trim());
-                double humidity =
-                        Double.parseDouble(fields[2].trim());
-                double pressure =
-                        Double.parseDouble(fields[3].trim());
-                double wind =
-                        Double.parseDouble(fields[4].trim());
-
-                if (!Double.isFinite(temperature)
-                        || !Double.isFinite(humidity)
-                        || !Double.isFinite(pressure)
-                        || !Double.isFinite(wind)) {
-
-                    printSkippedLine(
-                            lineNumber,
-                            "числові значення мають бути скінченними");
-                    continue;
-                }
-
-                if (humidity < 0.0) {
-                    printSkippedLine(
-                            lineNumber,
-                            "вологість не може бути від'ємною");
-                    continue;
-                }
-
-                if (pressure < 0.0) {
-                    printSkippedLine(
-                            lineNumber,
-                            "тиск не може бути від'ємним");
-                    continue;
-                }
-
-                if (wind < 0.0) {
-                    printSkippedLine(
-                            lineNumber,
-                            "швидкість вітру не може бути від'ємною");
-                    continue;
-                }
-
-                // Статистику оновлюємо тільки після повної перевірки запису.
-                validCount++;
-                minTemperature = Math.min(minTemperature, temperature);
-                totalHumidity += humidity;
-                maxWind = Math.max(maxWind, wind);
-
-            } catch (NumberFormatException exception) {
+                WeatherReading reading = WeatherReading.fromCsv(line);
+                readings.add(reading);
+            } catch (IllegalArgumentException exception) {
                 printSkippedLine(
                         lineNumber,
-                        "температура, вологість, тиск і вітер "
-                                + "повинні бути числами");
+                        exception.getMessage());
             }
         }
+
+        int validCount = readings.size();
 
         if (validCount == 0) {
             String report = String.format(
@@ -204,6 +130,22 @@ public final class Main {
             System.out.print(report);
             writeReport(output, report);
             return;
+        }
+
+        double minTemperature = Double.POSITIVE_INFINITY;
+        double totalHumidity = 0.0;
+        double maxWind = Double.NEGATIVE_INFINITY;
+
+        for (WeatherReading reading : readings) {
+            minTemperature = Math.min(
+                    minTemperature,
+                    reading.getTemperature());
+
+            totalHumidity += reading.getHumidity();
+
+            maxWind = Math.max(
+                    maxWind,
+                    reading.getWind());
         }
 
         double averageHumidity = totalHumidity / validCount;
