@@ -137,11 +137,13 @@ public final class Main {
         double maxWind = Double.NEGATIVE_INFINITY;
 
         for (WeatherReading reading : readings) {
+            TemperatureHumidity values = reading.temperatureHumidity();
+
             minTemperature = Math.min(
                     minTemperature,
-                    reading.getTemperature());
+                    values.temperature());
 
-            totalHumidity += reading.getHumidity();
+            totalHumidity += values.humidity();
 
             maxWind = Math.max(
                     maxWind,

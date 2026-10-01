@@ -98,4 +98,50 @@ class WeatherReadingTest {
                 IllegalArgumentException.class,
                 () -> new TemperatureHumidity(18.5, 120.0));
     }
+
+    @Test
+    void builderCreatesValidReading() {
+        WeatherReading reading = WeatherReading.builder()
+                .date("2026-09-01")
+                .temperature(18.5)
+                .humidity(62.0)
+                .pressure(1013.2)
+                .wind(3.4)
+                .build();
+
+        assertEquals("2026-09-01", reading.getDate());
+        assertEquals(18.5, reading.getTemperature(), 0.0001);
+        assertEquals(62.0, reading.getHumidity(), 0.0001);
+        assertEquals(1013.2, reading.getPressure(), 0.0001);
+        assertEquals(3.4, reading.getWind(), 0.0001);
+    }
+
+    @Test
+    void builderDoesNotBypassValidation() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> WeatherReading.builder()
+                        .date("2026-09-01")
+                        .temperature(18.5)
+                        .humidity(120.0)
+                        .pressure(1013.2)
+                        .wind(3.4)
+                        .build());
+    }
+
+    @Test
+    void fromCsvRejectsInvariantViolation() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> WeatherReading.fromCsv(
+                        "2026-09-01;18.5;120.0;1013.2;3.4"));
+    }
+
+    @Test
+    void constructorRejectsNegativeWind() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new WeatherReading(
+                        "2026-09-01", 18.5, 62.0, 1013.2, -1.0));
+    }
 }

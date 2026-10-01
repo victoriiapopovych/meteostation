@@ -102,6 +102,77 @@ public final class WeatherReading {
         }
     }
 
+    /**
+     * Створює новий builder для погодного запису.
+     *
+     * @return builder погодного запису
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Builder для створення об'єктів WeatherReading.
+     */
+    public static final class Builder {
+
+        private String date;
+        private Double temperature;
+        private Double humidity;
+        private Double pressure;
+        private Double wind;
+
+        private Builder() {
+        }
+
+        public Builder date(String date) {
+            this.date = date;
+            return this;
+        }
+
+        public Builder temperature(double temperature) {
+            this.temperature = temperature;
+            return this;
+        }
+
+        public Builder humidity(double humidity) {
+            this.humidity = humidity;
+            return this;
+        }
+
+        public Builder pressure(double pressure) {
+            this.pressure = pressure;
+            return this;
+        }
+
+        public Builder wind(double wind) {
+            this.wind = wind;
+            return this;
+        }
+
+        /**
+         * Створює WeatherReading через основний конструктор.
+         *
+         * @return коректний погодний запис
+         */
+        public WeatherReading build() {
+            if (temperature == null
+                    || humidity == null
+                    || pressure == null
+                    || wind == null) {
+                throw new IllegalStateException(
+                        "Усі числові поля мають бути задані");
+            }
+
+            return new WeatherReading(
+                    date,
+                    temperature,
+                    humidity,
+                    pressure,
+                    wind);
+        }
+    }
+
     /** Повертає дату спостереження. */
     public String getDate() {
         return date;
@@ -125,6 +196,15 @@ public final class WeatherReading {
     /** Повертає швидкість вітру. */
     public double getWind() {
         return wind;
+    }
+
+    /**
+     * Повертає пару температури та вологості.
+     *
+     * @return температура і вологість
+     */
+    public TemperatureHumidity temperatureHumidity() {
+        return new TemperatureHumidity(temperature, humidity);
     }
 
     /**
