@@ -708,7 +708,7 @@ GitHub Actions запускає перевірку на:
 Версія `2.0.0` використовується в `pom.xml`,
 параметрі `--version`, тестах і назві JAR.
 
-Після фінального merge буде створено Git-тег:
+Після фінального merge створено Git-тег:
 
 `v2.0.0`
 
@@ -720,9 +720,9 @@ GitHub Actions запускає перевірку на:
 - створюються JAR artifacts;
 - збережено зовнішню поведінку Lab 1.
 
-**CI:** `[]`  
-**JAR artifact:** `[]`  
-**Git tag `v2.0.0`:** `[]`
+**CI:** `https://github.com/victoriiapopovych/meteostation/actions/runs/37118459009`  
+**JAR artifact:** `https://github.com/victoriiapopovych/meteostation/actions/runs/37118459009`  
+**Git tag `v2.0.0`:** `https://github.com/victoriiapopovych/meteostation/tree/v2.0.0`
 
 ### 11. Відповіді на контрольні питання
 
