@@ -326,6 +326,56 @@ public abstract class WeatherReading {
     public abstract double dangerIndex();
 
     /**
+     * Порівнює погодні спостереження за логічним станом.
+     *
+     * @param other інший об'єкт
+     * @return true, якщо об'єкти логічно рівні
+     */
+    @Override
+    public final boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+
+        WeatherReading reading = (WeatherReading) other;
+
+        return Double.compare(
+                        temperature,
+                        reading.temperature) == 0
+                && Double.compare(
+                        humidity,
+                        reading.humidity) == 0
+                && Double.compare(
+                        pressure,
+                        reading.pressure) == 0
+                && Double.compare(
+                        wind,
+                        reading.wind) == 0
+                && date.equals(reading.date)
+                && kind == reading.kind;
+    }
+
+    /**
+     * Повертає хеш-код, узгоджений з equals.
+     *
+     * @return хеш-код погодного спостереження
+     */
+    @Override
+    public final int hashCode() {
+        return Objects.hash(
+                date,
+                temperature,
+                humidity,
+                pressure,
+                wind,
+                kind);
+    }
+
+    /**
      * Повертає текстове подання погодного запису.
      *
      * @return форматований запис
