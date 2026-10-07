@@ -206,26 +206,56 @@ public sealed abstract class WeatherReading
         private Builder() {
         }
 
+        /**
+         * Задає дату спостереження.
+         *
+         * @param date дата спостереження
+         * @return цей Builder
+         */
         public Builder date(String date) {
             this.date = date;
             return this;
         }
 
+        /**
+         * Задає температуру.
+         *
+         * @param temperature температура
+         * @return цей Builder
+         */
         public Builder temperature(double temperature) {
             this.temperature = temperature;
             return this;
         }
 
+        /**
+         * Задає вологість.
+         *
+         * @param humidity вологість
+         * @return цей Builder
+         */
         public Builder humidity(double humidity) {
             this.humidity = humidity;
             return this;
         }
 
+        /**
+         * Задає атмосферний тиск.
+         *
+         * @param pressure атмосферний тиск
+         * @return цей Builder
+         */
         public Builder pressure(double pressure) {
             this.pressure = pressure;
             return this;
         }
 
+        /**
+         * Задає швидкість вітру.
+         *
+         * @param wind швидкість вітру
+         * @return цей Builder
+         */
         public Builder wind(double wind) {
             this.wind = wind;
             return this;
