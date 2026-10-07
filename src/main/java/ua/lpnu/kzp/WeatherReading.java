@@ -6,7 +6,8 @@ import java.util.Objects;
 /**
  * Базовий тип погодного спостереження метеостанції.
  */
-public abstract class WeatherReading {
+public sealed abstract class WeatherReading
+        permits DailyReading, StormReading {
 
     /**
      * Межа швидкості вітру, починаючи з якої
@@ -373,6 +374,27 @@ public abstract class WeatherReading {
                 pressure,
                 wind,
                 kind);
+    }
+
+    /**
+     * Повертає короткий опис конкретного підтипу спостереження.
+     *
+     * @return опис підтипу
+     */
+    public final String subtypeDescription() {
+        return switch (this) {
+            case DailyReading reading ->
+                    String.format(
+                            Locale.ROOT,
+                            "Добове спостереження, вітер %.2f м/с",
+                            reading.getWind());
+
+            case StormReading reading ->
+                    String.format(
+                            Locale.ROOT,
+                            "Штормове спостереження, вітер %.2f м/с",
+                            reading.getWind());
+        };
     }
 
     /**

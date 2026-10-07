@@ -102,4 +102,32 @@ class WeatherReadingPolymorphismTest {
         assertEquals("добове", WeatherKind.DAILY.label());
         assertEquals("штормове", WeatherKind.STORM.label());
     }
+
+    @Test
+    void dailyReadingHasSubtypeDescription() {
+        WeatherReading reading = new DailyReading(
+                "2026-10-01",
+                18.0,
+                60.0,
+                1013.0,
+                3.0);
+
+        assertEquals(
+                "Добове спостереження, вітер 3.00 м/с",
+                reading.subtypeDescription());
+    }
+
+    @Test
+    void stormReadingHasSubtypeDescription() {
+        WeatherReading reading = new StormReading(
+                "2026-10-02",
+                12.0,
+                60.0,
+                995.0,
+                15.0);
+
+        assertEquals(
+                "Штормове спостереження, вітер 15.00 м/с",
+                reading.subtypeDescription());
+    }
 }
