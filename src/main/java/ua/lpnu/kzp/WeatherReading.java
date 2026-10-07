@@ -4,33 +4,70 @@ import java.util.Locale;
 import java.util.Objects;
 
 /**
- * Описує одне погодне спостереження метеостанції.
+ * Базовий тип погодного спостереження метеостанції.
  */
-public final class WeatherReading {
+public abstract class WeatherReading {
+
+    /**
+     * Межа швидкості вітру, починаючи з якої
+     * спостереження вважається штормовим.
+     */
+    protected static final double STORM_WIND_THRESHOLD = 15.0;
 
     private final String date;
     private final double temperature;
     private final double humidity;
     private final double pressure;
     private final double wind;
+    private final WeatherKind kind;
 
     /**
-     * Створює коректний запис метеостанції.
+     * Зберігає вже перевірений спільний стан погодного спостереження.
+     */
+    protected record ValidatedState(
+            String date,
+            double temperature,
+            double humidity,
+            double pressure,
+            double wind) {
+    }
+
+    /**
+     * Створює погодне спостереження з уже перевіреним станом.
+     *
+     * @param state перевірені погодні значення
+     * @param kind тип погодного спостереження
+     */
+    protected WeatherReading(
+            ValidatedState state,
+            WeatherKind kind) {
+
+        this.date = state.date();
+        this.temperature = state.temperature();
+        this.humidity = state.humidity();
+        this.pressure = state.pressure();
+        this.wind = state.wind();
+        this.kind = kind;
+    }
+
+    /**
+     * Перевіряє спільні інваріанти погодного спостереження.
      *
      * @param date дата спостереження
-     * @param temperature температура у градусах Цельсія
-     * @param humidity відносна вологість у відсотках
+     * @param temperature температура
+     * @param humidity вологість
      * @param pressure атмосферний тиск
      * @param wind швидкість вітру
+     * @return перевірений стан
      */
-    public WeatherReading(
+    protected static ValidatedState validateState(
             String date,
             double temperature,
             double humidity,
             double pressure,
             double wind) {
 
-        this.date = Objects.requireNonNull(
+        Objects.requireNonNull(
                 date,
                 "Дата не може бути null");
 
@@ -44,7 +81,8 @@ public final class WeatherReading {
                     "Дата повинна мати формат YYYY-MM-DD");
         }
 
-        if (!Double.isFinite(temperature) || temperature < -273.15) {
+        if (!Double.isFinite(temperature)
+                || temperature < -273.15) {
             throw new IllegalArgumentException(
                     "Температура має бути скінченною і не нижчою за -273.15");
         }
@@ -56,27 +94,32 @@ public final class WeatherReading {
                     "Вологість має бути в межах від 0 до 100");
         }
 
-        if (!Double.isFinite(pressure) || pressure < 0.0) {
+        if (!Double.isFinite(pressure)
+                || pressure < 0.0) {
             throw new IllegalArgumentException(
                     "Тиск має бути скінченним і не від'ємним");
         }
 
-        if (!Double.isFinite(wind) || wind < 0.0) {
+        if (!Double.isFinite(wind)
+                || wind < 0.0) {
             throw new IllegalArgumentException(
                     "Швидкість вітру має бути скінченною і не від'ємною");
         }
 
-        this.temperature = temperature;
-        this.humidity = humidity;
-        this.pressure = pressure;
-        this.wind = wind;
+        return new ValidatedState(
+                date,
+                temperature,
+                humidity,
+                pressure,
+                wind);
     }
 
     /**
      * Створює погодний запис із CSV-рядка.
      *
-     * @param line рядок у форматі date;temperature;humidity;pressure;wind
-     * @return створений погодний запис
+     * @param line рядок у форматі
+     *             date;temperature;humidity;pressure;wind
+     * @return створене погодне спостереження
      * @throws IllegalArgumentException якщо рядок має неправильний формат
      */
     public static WeatherReading fromCsv(String line) {
@@ -89,12 +132,22 @@ public final class WeatherReading {
         }
 
         try {
-            return new WeatherReading(
-                    fields[0].trim(),
-                    Double.parseDouble(fields[1].trim()),
-                    Double.parseDouble(fields[2].trim()),
-                    Double.parseDouble(fields[3].trim()),
-                    Double.parseDouble(fields[4].trim()));
+            String date = fields[0].trim();
+            double temperature =
+                    Double.parseDouble(fields[1].trim());
+            double humidity =
+                    Double.parseDouble(fields[2].trim());
+            double pressure =
+                    Double.parseDouble(fields[3].trim());
+            double wind =
+                    Double.parseDouble(fields[4].trim());
+
+            return createReading(
+                    date,
+                    temperature,
+                    humidity,
+                    pressure,
+                    wind);
         } catch (NumberFormatException exception) {
             throw new IllegalArgumentException(
                     "Числове поле має неправильний формат",
@@ -103,9 +156,36 @@ public final class WeatherReading {
     }
 
     /**
-     * Створює новий builder для погодного запису.
+     * Створює відповідний підтип погодного спостереження.
+     */
+    private static WeatherReading createReading(
+            String date,
+            double temperature,
+            double humidity,
+            double pressure,
+            double wind) {
+
+        if (wind >= STORM_WIND_THRESHOLD) {
+            return new StormReading(
+                    date,
+                    temperature,
+                    humidity,
+                    pressure,
+                    wind);
+        }
+
+        return new DailyReading(
+                date,
+                temperature,
+                humidity,
+                pressure,
+                wind);
+    }
+
+    /**
+     * Створює новий Builder погодного запису.
      *
-     * @return builder погодного запису
+     * @return Builder погодного запису
      */
     public static Builder builder() {
         return new Builder();
@@ -151,9 +231,9 @@ public final class WeatherReading {
         }
 
         /**
-         * Створює WeatherReading через основний конструктор.
+         * Створює відповідний підтип WeatherReading.
          *
-         * @return коректний погодний запис
+         * @return коректне погодне спостереження
          */
         public WeatherReading build() {
             if (temperature == null
@@ -164,7 +244,7 @@ public final class WeatherReading {
                         "Усі числові поля мають бути задані");
             }
 
-            return new WeatherReading(
+            return createReading(
                     date,
                     temperature,
                     humidity,
@@ -173,29 +253,58 @@ public final class WeatherReading {
         }
     }
 
-    /** Повертає дату спостереження. */
-    public String getDate() {
+    /**
+     * Повертає дату спостереження.
+     *
+     * @return дата
+     */
+    public final String getDate() {
         return date;
     }
 
-    /** Повертає температуру. */
-    public double getTemperature() {
+    /**
+     * Повертає температуру.
+     *
+     * @return температура
+     */
+    public final double getTemperature() {
         return temperature;
     }
 
-    /** Повертає вологість. */
-    public double getHumidity() {
+    /**
+     * Повертає вологість.
+     *
+     * @return вологість
+     */
+    public final double getHumidity() {
         return humidity;
     }
 
-    /** Повертає атмосферний тиск. */
-    public double getPressure() {
+    /**
+     * Повертає атмосферний тиск.
+     *
+     * @return атмосферний тиск
+     */
+    public final double getPressure() {
         return pressure;
     }
 
-    /** Повертає швидкість вітру. */
-    public double getWind() {
+    /**
+     * Повертає швидкість вітру.
+     *
+     * @return швидкість вітру
+     */
+    public final double getWind() {
         return wind;
+    }
+
+    /**
+     * Повертає тип погодного спостереження.
+     *
+     * @return тип спостереження
+     */
+    public final WeatherKind getKind() {
+        return kind;
     }
 
     /**
@@ -203,9 +312,18 @@ public final class WeatherReading {
      *
      * @return температура і вологість
      */
-    public TemperatureHumidity temperatureHumidity() {
-        return new TemperatureHumidity(temperature, humidity);
+    public final TemperatureHumidity temperatureHumidity() {
+        return new TemperatureHumidity(
+                temperature,
+                humidity);
     }
+
+    /**
+     * Обчислює індекс небезпеки.
+     *
+     * @return індекс небезпеки
+     */
+    public abstract double dangerIndex();
 
     /**
      * Повертає текстове подання погодного запису.
@@ -213,10 +331,11 @@ public final class WeatherReading {
      * @return форматований запис
      */
     @Override
-    public String toString() {
+    public final String toString() {
         return String.format(
                 Locale.ROOT,
-                "%s: temperature=%.2f, humidity=%.2f, pressure=%.2f, wind=%.2f",
+                "%s: temperature=%.2f, humidity=%.2f, "
+                        + "pressure=%.2f, wind=%.2f",
                 date,
                 temperature,
                 humidity,

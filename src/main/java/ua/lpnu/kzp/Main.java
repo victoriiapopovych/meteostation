@@ -135,6 +135,7 @@ public final class Main {
         double minTemperature = Double.POSITIVE_INFINITY;
         double totalHumidity = 0.0;
         double maxWind = Double.NEGATIVE_INFINITY;
+        double maxDangerIndex = Double.NEGATIVE_INFINITY;
 
         for (WeatherReading reading : readings) {
             TemperatureHumidity values = reading.temperatureHumidity();
@@ -148,6 +149,10 @@ public final class Main {
             maxWind = Math.max(
                     maxWind,
                     reading.getWind());
+
+            maxDangerIndex = Math.max(
+                    maxDangerIndex,
+                    reading.dangerIndex());
         }
 
         double averageHumidity = totalHumidity / validCount;
@@ -158,11 +163,14 @@ public final class Main {
                         + "Коректних записів: %d%n"
                         + "Мінімальна температура: %.2f%n"
                         + "Середня вологість: %.2f%n"
-                        + "Найбільша швидкість вітру: %.2f%n",
+                        + "Найбільша швидкість вітру: %.2f%n"
+                        + "Найбільший індекс небезпеки: %.2f%n",
+                        
                 validCount,
                 minTemperature,
                 averageHumidity,
-                maxWind);
+                maxWind,
+                maxDangerIndex);
 
         System.out.print(report);
         writeReport(output, report);

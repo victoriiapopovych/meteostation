@@ -10,7 +10,7 @@ class WeatherReadingTest {
     @Test
     void constructorCreatesValidReading() {
         WeatherReading reading =
-                new WeatherReading("2026-09-01", 18.5, 62.0, 1013.2, 3.4);
+                new DailyReading("2026-09-01", 18.5, 62.0, 1013.2, 3.4);
 
         assertEquals("2026-09-01", reading.getDate());
         assertEquals(18.5, reading.getTemperature(), 0.0001);
@@ -23,28 +23,28 @@ class WeatherReadingTest {
     void constructorRejectsNullDate() {
         assertThrows(
                 NullPointerException.class,
-                () -> new WeatherReading(null, 18.5, 62.0, 1013.2, 3.4));
+                () -> new DailyReading(null, 18.5, 62.0, 1013.2, 3.4));
     }
 
     @Test
     void constructorRejectsBlankDate() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new WeatherReading(" ", 18.5, 62.0, 1013.2, 3.4));
+                () -> new DailyReading(" ", 18.5, 62.0, 1013.2, 3.4));
     }
 
     @Test
     void constructorRejectsInvalidHumidity() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new WeatherReading(
+                () -> new DailyReading(
                         "2026-09-01", 18.5, 101.0, 1013.2, 3.4));
     }
 
     @Test
     void constructorAcceptsBoundaryValues() {
         WeatherReading reading =
-                new WeatherReading("2026-09-01", -273.15, 100.0, 0.0, 0.0);
+                new DailyReading("2026-09-01", -273.15, 100.0, 0.0, 0.0);
 
         assertEquals(-273.15, reading.getTemperature(), 0.0001);
         assertEquals(100.0, reading.getHumidity(), 0.0001);
@@ -141,7 +141,7 @@ class WeatherReadingTest {
     void constructorRejectsNegativeWind() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new WeatherReading(
+                () -> new DailyReading(
                         "2026-09-01", 18.5, 62.0, 1013.2, -1.0));
     }
 }
