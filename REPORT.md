@@ -1126,6 +1126,27 @@ Maven, SpotBugs та GitHub Actions.
 `dangerIndex()`, оскільки ця логіка вже реалізована
 поліморфно в підтипах і не повинна дублюватися.
 
+## Посилання на результати Lab 3
+
+**GitHub-репозиторій:**  
+https://github.com/victoriiapopovych/meteostation
+
+**Фінальний CI:**  
+https://github.com/victoriiapopovych/meteostation/actions/runs/37641689274
+
+**JAR artifacts:**  
+https://github.com/victoriiapopovych/meteostation/actions/runs/37641689274
+
+**Git tag `v3.0.0`:**  
+https://github.com/victoriiapopovych/meteostation/tree/v3.0.0
+
+### Результати на трьох операційних системах
+
+- Ubuntu — `verify` успішно;
+- Windows — `verify` успішно;
+- macOS — `verify` успішно;
+- на кожній платформі створено JAR artifact.
+
 ## Відповіді на контрольні питання
 
 1. **Яку спільну проблему розв'язує базовий тип у предметній області?**  
