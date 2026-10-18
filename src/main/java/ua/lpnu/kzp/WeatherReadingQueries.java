@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.DoubleSummaryStatistics;
+import java.util.Comparator;
+import java.util.Optional;
 
 /**
  * Містить потокові запити для колекції погодних спостережень.
@@ -78,5 +81,81 @@ public final class WeatherReadingQueries {
                         TreeMap::new,
                         Collectors.averagingDouble(
                                 WeatherReading::getTemperature)));
+    }
+
+    /**
+     * Обчислює зведену статистику температури.
+     *
+     * @param readings погодні спостереження
+     * @return статистика температури
+     */
+    public static DoubleSummaryStatistics temperatureStatistics(
+            List<WeatherReading> readings) {
+
+        Objects.requireNonNull(
+                readings,
+                "Список спостережень не може бути null");
+
+        return readings.stream()
+                .collect(Collectors.summarizingDouble(
+                        WeatherReading::getTemperature));
+    }
+
+    /**
+     * Повертає перші N погодних спостережень,
+     * відсортованих за температурою за спаданням,
+     * а при однаковій температурі — за датою за зростанням.
+     *
+     * @param readings погодні спостереження
+     * @param limit максимальна кількість результатів
+     * @return впорядкований список спостережень
+     */
+    public static List<WeatherReading> topByTemperature(
+            List<WeatherReading> readings,
+            int limit) {
+
+        Objects.requireNonNull(
+                readings,
+                "Список спостережень не може бути null");
+
+        if (limit < 0) {
+            throw new IllegalArgumentException(
+                    "Кількість результатів не може бути від'ємною");
+        }
+
+        Comparator<WeatherReading> comparator =
+                Comparator.comparingDouble(
+                        WeatherReading::getTemperature)
+                        .reversed()
+                        .thenComparing(WeatherReading::getDate);
+
+        return readings.stream()
+                .sorted(comparator)
+                .limit(limit)
+                .toList();
+    }
+
+    /**
+     * Повертає перше погодне спостереження із заданою датою.
+     *
+     * @param readings погодні спостереження
+     * @param date дата пошуку
+     * @return перше знайдене спостереження або Optional.empty()
+     */
+    public static Optional<WeatherReading> findByDate(
+            List<WeatherReading> readings,
+            String date) {
+
+        Objects.requireNonNull(
+                readings,
+                "Список спостережень не може бути null");
+
+        Objects.requireNonNull(
+                date,
+                "Дата пошуку не може бути null");
+
+        return readings.stream()
+                .filter(reading -> reading.getDate().equals(date))
+                .findFirst();
     }
 }

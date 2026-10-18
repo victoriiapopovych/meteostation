@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import java.util.DoubleSummaryStatistics;
+import java.util.Optional;
 
 class WeatherReadingQueriesTest {
 
@@ -110,5 +112,153 @@ class WeatherReadingQueriesTest {
         WeatherReadingQueries.averageTemperatureByMonth(readings);
 
         assertEquals(original, readings);
+    }
+
+    @Test
+    void calculatesTemperatureStatistics() {
+        List<WeatherReading> readings = List.of(
+                new DailyReading(
+                        "2026-09-01", 10.0, 60.0, 1012.0, 5.0),
+                new DailyReading(
+                        "2026-09-02", 20.0, 65.0, 1010.0, 7.0),
+                new StormReading(
+                        "2026-09-03", 5.0, 70.0, 1005.0, 15.0));
+
+        DoubleSummaryStatistics statistics =
+                WeatherReadingQueries.temperatureStatistics(readings);
+
+        assertEquals(3, statistics.getCount());
+        assertEquals(5.0, statistics.getMin(), 0.0001);
+        assertEquals(20.0, statistics.getMax(), 0.0001);
+        assertEquals(35.0, statistics.getSum(), 0.0001);
+        assertEquals(35.0 / 3.0, statistics.getAverage(), 0.0001);
+    }
+
+    @Test
+    void returnsEmptyTemperatureStatisticsForEmptyInput() {
+        DoubleSummaryStatistics statistics =
+                WeatherReadingQueries.temperatureStatistics(List.of());
+
+        assertEquals(0, statistics.getCount());
+        assertEquals(0.0, statistics.getSum(), 0.0001);
+        assertEquals(0.0, statistics.getAverage(), 0.0001);
+        assertEquals(
+                Double.POSITIVE_INFINITY,
+                statistics.getMin());
+        assertEquals(
+                Double.NEGATIVE_INFINITY,
+                statistics.getMax());
+    }
+
+    @Test
+    void returnsTopFiveByTemperatureAndDate() {
+        List<WeatherReading> readings = List.of(
+                new DailyReading(
+                        "2026-09-01", 20.0, 60.0, 1012.0, 5.0),
+                new DailyReading(
+                        "2026-09-04", 25.0, 61.0, 1011.0, 6.0),
+                new DailyReading(
+                        "2026-09-06", 30.0, 62.0, 1010.0, 7.0),
+                new DailyReading(
+                        "2026-09-02", 25.0, 63.0, 1009.0, 8.0),
+                new DailyReading(
+                        "2026-09-03", 15.0, 64.0, 1008.0, 9.0),
+                new DailyReading(
+                        "2026-09-05", 10.0, 65.0, 1007.0, 10.0));
+
+        List<WeatherReading> result =
+                WeatherReadingQueries.topByTemperature(readings, 5);
+
+        assertEquals(5, result.size());
+
+        assertEquals("2026-09-06", result.get(0).getDate());
+        assertEquals("2026-09-02", result.get(1).getDate());
+        assertEquals("2026-09-04", result.get(2).getDate());
+        assertEquals("2026-09-01", result.get(3).getDate());
+        assertEquals("2026-09-03", result.get(4).getDate());
+    }
+
+    @Test
+    void topWithZeroLimitReturnsEmptyList() {
+        List<WeatherReading> readings = List.of(
+                new DailyReading(
+                        "2026-09-01", 20.0, 60.0, 1012.0, 5.0));
+
+        assertTrue(
+                WeatherReadingQueries
+                        .topByTemperature(readings, 0)
+                        .isEmpty());
+    }
+
+    @Test
+    void topWithLimitGreaterThanSizeReturnsAllReadings() {
+        List<WeatherReading> readings = List.of(
+                new DailyReading(
+                        "2026-09-01", 10.0, 60.0, 1012.0, 5.0),
+                new DailyReading(
+                        "2026-09-02", 30.0, 65.0, 1010.0, 7.0),
+                new DailyReading(
+                        "2026-09-03", 20.0, 70.0, 1008.0, 9.0));
+
+        List<WeatherReading> result =
+                WeatherReadingQueries.topByTemperature(readings, 5);
+
+        assertEquals(3, result.size());
+        assertEquals(30.0, result.get(0).getTemperature(), 0.0001);
+        assertEquals(20.0, result.get(1).getTemperature(), 0.0001);
+        assertEquals(10.0, result.get(2).getTemperature(), 0.0001);
+    }
+
+    @Test
+    void findsReadingByDate() {
+        List<WeatherReading> readings = List.of(
+                new DailyReading(
+                        "2026-09-01", 18.0, 60.0, 1012.0, 5.0),
+                new StormReading(
+                        "2026-09-02", 12.0, 70.0, 1005.0, 16.0));
+
+        Optional<WeatherReading> result =
+                WeatherReadingQueries.findByDate(
+                        readings,
+                        "2026-09-02");
+
+        assertTrue(result.isPresent());
+        assertEquals("2026-09-02", result.get().getDate());
+    }
+
+    @Test
+    void findByDateReturnsEmptyWhenDateIsMissing() {
+        List<WeatherReading> readings = List.of(
+                new DailyReading(
+                        "2026-09-01", 18.0, 60.0, 1012.0, 5.0));
+
+        Optional<WeatherReading> result =
+                WeatherReadingQueries.findByDate(
+                        readings,
+                        "2026-09-10");
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void findByDateReturnsFirstDuplicate() {
+        WeatherReading first =
+                new DailyReading(
+                        "2026-09-01", 10.0, 60.0, 1012.0, 5.0);
+
+        WeatherReading second =
+                new DailyReading(
+                        "2026-09-01", 20.0, 65.0, 1010.0, 7.0);
+
+        List<WeatherReading> readings =
+                List.of(first, second);
+
+        Optional<WeatherReading> result =
+                WeatherReadingQueries.findByDate(
+                        readings,
+                        "2026-09-01");
+
+        assertTrue(result.isPresent());
+        assertEquals(first, result.get());
     }
 }
