@@ -158,4 +158,29 @@ public final class WeatherReadingQueries {
                 .filter(reading -> reading.getDate().equals(date))
                 .findFirst();
     }
+
+    /**
+     * Групує погодні спостереження за місяцем і типом погоди
+     * та обчислює середню температуру для кожної групи.
+     *
+     * @param readings погодні спостереження
+     * @return місяць -> тип погоди -> середня температура
+     */
+    public static Map<String, Map<WeatherKind, Double>>
+            averageTemperatureByMonthAndKind(
+                    List<WeatherReading> readings) {
+
+        Objects.requireNonNull(
+                readings,
+                "Список спостережень не може бути null");
+
+        return readings.stream()
+                .collect(Collectors.groupingBy(
+                        reading -> reading.getDate().substring(0, 7),
+                        TreeMap::new,
+                        Collectors.groupingBy(
+                                WeatherReading::getKind,
+                                Collectors.averagingDouble(
+                                        WeatherReading::getTemperature))));
+    }
 }

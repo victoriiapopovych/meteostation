@@ -110,6 +110,7 @@ class WeatherReadingQueriesTest {
         WeatherReadingQueries.filterByWind(readings, 10.0);
         WeatherReadingQueries.dates(readings);
         WeatherReadingQueries.averageTemperatureByMonth(readings);
+        WeatherReadingQueries.averageTemperatureByMonthAndKind(readings);
 
         assertEquals(original, readings);
     }
@@ -260,5 +261,70 @@ class WeatherReadingQueriesTest {
 
         assertTrue(result.isPresent());
         assertEquals(first, result.get());
+    }
+
+    @Test
+    void groupsTemperatureByMonthAndWeatherKind() {
+        List<WeatherReading> readings = List.of(
+                new DailyReading(
+                        "2026-09-01", 10.0, 60.0, 1012.0, 5.0),
+                new DailyReading(
+                        "2026-09-10", 20.0, 65.0, 1010.0, 7.0),
+                new StormReading(
+                        "2026-09-15", 5.0, 70.0, 1005.0, 15.0),
+                new StormReading(
+                        "2026-09-20", 15.0, 75.0, 1000.0, 16.0),
+                new DailyReading(
+                        "2026-10-01", 8.0, 55.0, 1015.0, 4.0));
+
+        Map<String, Map<WeatherKind, Double>> result =
+                WeatherReadingQueries
+                        .averageTemperatureByMonthAndKind(readings);
+
+        assertEquals(2, result.size());
+
+        assertEquals(
+                15.0,
+                result.get("2026-09").get(WeatherKind.DAILY),
+                0.0001);
+
+        assertEquals(
+                10.0,
+                result.get("2026-09").get(WeatherKind.STORM),
+                0.0001);
+
+        assertEquals(
+                8.0,
+                result.get("2026-10").get(WeatherKind.DAILY),
+                0.0001);
+    }
+
+    @Test
+    void keepsDailyAndStormAsSeparateGroups() {
+        List<WeatherReading> readings = List.of(
+                new DailyReading(
+                        "2026-09-01", 18.0, 60.0, 1012.0, 5.0),
+                new StormReading(
+                        "2026-09-02", 12.0, 70.0, 1005.0, 16.0));
+
+        Map<String, Map<WeatherKind, Double>> result =
+                WeatherReadingQueries
+                        .averageTemperatureByMonthAndKind(readings);
+
+        Map<WeatherKind, Double> september =
+                result.get("2026-09");
+
+        assertEquals(2, september.size());
+        assertEquals(18.0, september.get(WeatherKind.DAILY), 0.0001);
+        assertEquals(12.0, september.get(WeatherKind.STORM), 0.0001);
+    }
+
+    @Test
+    void twoLevelGroupingReturnsEmptyMapForEmptyInput() {
+        Map<String, Map<WeatherKind, Double>> result =
+                WeatherReadingQueries
+                        .averageTemperatureByMonthAndKind(List.of());
+
+        assertTrue(result.isEmpty());
     }
 }
