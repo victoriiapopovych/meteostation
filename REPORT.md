@@ -1641,19 +1641,19 @@ https://github.com/victoriiapopovych/meteostation/actions/runs/39115252574
 
 `develop-lab4 → develop`
 
-**Посилання буде додано після створення Pull Request.**
+https://github.com/victoriiapopovych/meteostation/pull/23
 
 Після об'єднання з `develop` створюється release Pull Request:
 
 `develop → main`
 
-**Посилання буде додано після створення Pull Request.**
+https://github.com/victoriiapopovych/meteostation/pull/24
 
 Після фінального merge створюється Git tag:
 
 `v4.0.0`
 
-**Посилання буде додано після створення тегу.**
+https://github.com/victoriiapopovych/meteostation/tree/v4.0.0
 
 ## Порівняння реалізацій
 
