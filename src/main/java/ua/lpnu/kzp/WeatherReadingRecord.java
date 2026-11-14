@@ -1,6 +1,8 @@
 package ua.lpnu.kzp;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -75,6 +77,86 @@ public final class WeatherReadingRecord {
         this.humidity = humidity;
         this.pressure = pressure;
         this.wind = wind;
+    }
+
+    /**
+     * Створює запис з одного CSV-рядка.
+     *
+     * @param line CSV-рядок
+     * @return відновлений запис
+     * @throws DataStorageException якщо CSV некоректний
+     */
+    public static WeatherReadingRecord fromCsv(
+            String line)
+            throws DataStorageException {
+
+        List<String> fields =
+                CsvParser.parse(line);
+
+        return fromFields(fields);
+    }
+
+    /**
+     * Створює запис із уже розібраних CSV-полів.
+     *
+     * @param fields значення CSV-полів
+     * @return відновлений запис
+     * @throws DataStorageException якщо значення некоректні
+     */
+    static WeatherReadingRecord fromFields(
+            List<String> fields)
+            throws DataStorageException {
+
+        Objects.requireNonNull(
+                fields,
+                "CSV-поля не можуть бути null");
+
+        if (fields.size() != 5) {
+            throw new DataStorageException(
+                    "Очікується 5 CSV-полів");
+        }
+
+        final LocalDate date;
+
+        try {
+            date = LocalDate.parse(
+                    fields.get(0));
+
+        } catch (DateTimeParseException exception) {
+            throw new DataStorageException(
+                    "Некоректна дата у CSV-записі метеостанції",
+                    exception);
+        }
+
+        try {
+            double humidity =
+                    Double.parseDouble(
+                            fields.get(1));
+
+            double pressure =
+                    Double.parseDouble(
+                            fields.get(2));
+
+            double temperature =
+                    Double.parseDouble(
+                            fields.get(3));
+
+            double wind =
+                    Double.parseDouble(
+                            fields.get(4));
+
+            return new WeatherReadingRecord(
+                    date,
+                    temperature,
+                    humidity,
+                    pressure,
+                    wind);
+
+        } catch (IllegalArgumentException exception) {
+            throw new DataStorageException(
+                    "Некоректний CSV-запис метеостанції",
+                    exception);
+        }
     }
 
     /**

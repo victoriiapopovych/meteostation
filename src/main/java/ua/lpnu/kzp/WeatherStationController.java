@@ -99,6 +99,21 @@ public final class WeatherStationController {
         List<WeatherReading> readings =
             repository.all();
 
+        Path csvOutput =
+                output.resolveSibling(
+                        "weather-readings.csv");
+
+        try {
+            WeatherReadingCsvStorage.write(
+                    csvOutput,
+                    readings);
+        } catch (DataStorageException exception) {
+            System.err.printf(
+                    "Не вдалося зберегти CSV \"%s\": %s%n",
+                    csvOutput,
+                    exception.getMessage());
+        }
+
         int validCount = readings.size();
 
         if (validCount == 0) {
