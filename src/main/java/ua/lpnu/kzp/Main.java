@@ -16,7 +16,6 @@ public final class Main {
 
     private static final Path DEFAULT_INPUT = Path.of("data", "input.csv");
     private static final Path DEFAULT_OUTPUT = Path.of("out", "report.txt");
-    private static final String VERSION = "4.0.0";
 
     private Main() {
     }
@@ -39,7 +38,7 @@ public final class Main {
                 }
 
                 case "--version" -> {
-                    System.out.println(VERSION);
+                    System.out.println(ProjectVersion.get());
                     return;
                 }
 
