@@ -27,6 +27,11 @@ public final class WeatherStationController {
             System.err.printf(
                     "Помилка: %s%n",
                     exception.getMessage());
+
+            if (exception.getMessage().startsWith("невідомий аргумент")) {
+                printHelp();
+            }
+
             return;
         }
 
