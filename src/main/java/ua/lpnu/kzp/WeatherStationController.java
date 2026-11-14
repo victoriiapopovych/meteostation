@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -68,8 +67,8 @@ public final class WeatherStationController {
             return;
         }
 
-        List<WeatherReading> readings =
-                new ArrayList<>();
+        Repository<WeatherReading> repository =
+            new Repository<>();
 
         for (int index = 0;
                 index < lines.size();
@@ -89,7 +88,7 @@ public final class WeatherStationController {
                 WeatherReading reading =
                         WeatherReading.fromCsv(line);
 
-                readings.add(reading);
+                repository.add(reading);
 
             } catch (IllegalArgumentException exception) {
                 printSkippedLine(
@@ -97,6 +96,8 @@ public final class WeatherStationController {
                         exception.getMessage());
             }
         }
+        List<WeatherReading> readings =
+            repository.all();
 
         int validCount = readings.size();
 
