@@ -6,33 +6,100 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
  * Експортує анотовані поля об'єктів у CSV-файл.
+ *
+ * @param <T> тип об'єктів для експорту
  */
-public final class CsvExporter {
+public final class CsvExporter<T>
+        implements Exporter<T> {
 
-    private CsvExporter() {
+    /**
+     * Створює CSV-exporter.
+     */
+    public CsvExporter() {
     }
 
     /**
-     * Записує об'єкти у CSV-файл з кодуванням UTF-8.
+     * Експортує записи відповідно до спільного контракту.
+     *
+     * @param path шлях до CSV-файла
+     * @param type клас об'єктів
+     * @param records записи для експорту
+     * @throws DataStorageException якщо експорт неможливий
+     */
+    @Override
+    public void export(
+            Path path,
+            Class<T> type,
+            List<? extends T> records)
+            throws DataStorageException {
+
+        write(path, type, records);
+    }
+
+    /**
+     * Записує об'єкти у CSV із використанням кешованих
+     * reflection-полів.
      *
      * @param path шлях до CSV-файла
      * @param type клас об'єктів
      * @param records об'єкти для експорту
-     * @param <T> тип об'єктів
+     * @param <E> тип об'єктів
      * @throws DataStorageException якщо експорт неможливий
      */
-    public static <T> void write(
+    public static <E> void write(
             Path path,
-            Class<T> type,
-            List<? extends T> records)
+            Class<E> type,
+            List<? extends E> records)
+            throws DataStorageException {
+
+        List<Field> fields =
+                AnnotatedFieldResolver.resolve(type);
+
+        writeInternal(
+                path,
+                records,
+                fields);
+    }
+
+    /**
+     * Виконує такий самий CSV-експорт,
+     * але без використання кешу reflection-полів.
+     *
+     * <p>Метод використовується для вимірювання
+     * ефекту кешування.</p>
+     *
+     * @param path шлях до CSV-файла
+     * @param type клас об'єктів
+     * @param records об'єкти для експорту
+     * @param <E> тип об'єктів
+     * @throws DataStorageException якщо експорт неможливий
+     */
+    static <E> void writeWithoutCache(
+            Path path,
+            Class<E> type,
+            List<? extends E> records)
+            throws DataStorageException {
+
+        List<Field> fields =
+                AnnotatedFieldResolver.resolveUncached(
+                        type);
+
+        writeInternal(
+                path,
+                records,
+                fields);
+    }
+
+    private static <E> void writeInternal(
+            Path path,
+            List<? extends E> records,
+            List<Field> fields)
             throws DataStorageException {
 
         Objects.requireNonNull(
@@ -40,20 +107,8 @@ public final class CsvExporter {
                 "Шлях не може бути null");
 
         Objects.requireNonNull(
-                type,
-                "Тип не може бути null");
-
-        Objects.requireNonNull(
                 records,
                 "Список записів не може бути null");
-
-        List<Field> fields =
-                annotatedFields(type);
-
-        if (fields.isEmpty()) {
-            throw new DataStorageException(
-                    "Клас не має полів з @CsvColumn");
-        }
 
         String header = fields.stream()
                 .map(field -> field
@@ -66,7 +121,7 @@ public final class CsvExporter {
                 new StringBuilder(header)
                         .append(System.lineSeparator());
 
-        for (T record : records) {
+        for (E record : records) {
 
             if (record == null) {
                 throw new DataStorageException(
@@ -80,7 +135,8 @@ public final class CsvExporter {
                     index < fields.size();
                     index++) {
 
-                Field field = fields.get(index);
+                Field field =
+                        fields.get(index);
 
                 if (index > 0) {
                     row.append(',');
@@ -127,37 +183,15 @@ public final class CsvExporter {
 
         } catch (IOException exception) {
             throw new DataStorageException(
-                    "Не вдалося записати CSV: " + path,
+                    "Не вдалося записати CSV: "
+                            + path,
                     exception);
         }
     }
 
-    private static List<Field> annotatedFields(
-            Class<?> type)
-            throws DataStorageException {
+    private static String escape(
+            String value) {
 
-        List<Field> fields =
-                Arrays.stream(type.getDeclaredFields())
-                        .filter(field ->
-                                field.isAnnotationPresent(
-                                        CsvColumn.class))
-                        .sorted(
-                                Comparator.comparing(
-                                        Field::getName))
-                        .toList();
-
-        for (Field field : fields) {
-            if (!field.trySetAccessible()) {
-                throw new DataStorageException(
-                        "Немає доступу до поля "
-                                + field.getName());
-            }
-        }
-
-        return fields;
-    }
-
-    private static String escape(String value) {
         boolean requiresQuotes =
                 value.contains(",")
                         || value.contains("\"")
@@ -169,7 +203,9 @@ public final class CsvExporter {
         }
 
         return "\""
-                + value.replace("\"", "\"\"")
+                + value.replace(
+                        "\"",
+                        "\"\"")
                 + "\"";
     }
 }
