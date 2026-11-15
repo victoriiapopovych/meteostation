@@ -134,8 +134,8 @@ class MainTest {
         }
 
         assertEquals(
-                "4.0.0" + System.lineSeparator(),
-                output.toString(StandardCharsets.UTF_8));
+            ProjectVersion.get(),
+            output.toString(StandardCharsets.UTF_8).trim());
     }
 
     private String runProgram(String... lines) throws IOException {
