@@ -2476,7 +2476,7 @@ GitHub Actions має перевірити однаковий код на:
 - Windows;
 - macOS.
 
-**Фінальне посилання на зелений CI буде додано після фінального push/PR.**
+**https://github.com/victoriiapopovych/meteostation/actions/runs/43705151905**
 
 Очікується створення трьох JAR artifacts:
 
@@ -2496,13 +2496,11 @@ GitHub Actions має перевірити однаковий код на:
 
 | Issue | Зміна | Перевірка |
 |---|---|---|
-| `#...` | Єдине джерело версії та рефакторинг запуску програми | `--version`, попередні тести, CI |
-| `#...` | `Repository<T>`, `DataStorageException`, `@CsvColumn`, універсальний CSV-export | тести repository, reflection, CSV |
-| `#...` | `CsvParser`, предметний імпорт і round-trip | edge cases, round-trip, `clean verify` |
-| `#...` | Завдання із зірочкою: `Exporter<T>`, JSON і reflection cache | 113 тестів, benchmark |
-| `#...` | Версія `5.0.0`, CI, документація та повний цикл | CI на трьох ОС, JAR artifacts |
-
-**Номери Issues потрібно підставити з GitHub перед фінальною здачею.**
+| `#25` | Єдине джерело версії та рефакторинг запуску програми | `--version`, попередні тести, CI |
+| `#26` | `Repository<T>`, `DataStorageException`, `@CsvColumn`, універсальний CSV-export | тести repository, reflection, CSV |
+| `#27` | `CsvParser`, предметний імпорт і round-trip | edge cases, round-trip, `clean verify` |
+| `#28` | Завдання із зірочкою: `Exporter<T>`, JSON і reflection cache | 113 тестів, benchmark |
+| `#29` | Версія `5.0.0`, CI, документація та повний цикл | CI на трьох ОС, JAR artifacts |
 
 Робоча гілка:
 
@@ -2512,30 +2510,21 @@ GitHub Actions має перевірити однаковий код на:
 
 `develop-lab5 → develop`
 
-**Посилання буде додано після створення Pull Request.**
+**https://github.com/victoriiapopovych/meteostation/pull/30**
 
 Після merge у `develop` створюється release Pull Request:
 
 `develop → main`
 
-**Посилання буде додано після створення release Pull Request.**
+**https://github.com/victoriiapopovych/meteostation/pull/31**
 
 Після фінального merge створюється Git tag:
 
 `v5.0.0`
 
-**Посилання буде додано після створення тегу.**
+**https://github.com/victoriiapopovych/meteostation/releases/tag/v5.0.0**
 
-Pull Request Lab 5 має містити:
 
-- `Closes #N`;
-- приклад CSV;
-- результат round-trip;
-- таблицю помилок;
-- результати локальної перевірки;
-- посилання на зелений CI.
-
----
 
 ## Порівняння стану
 
